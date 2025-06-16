@@ -56,60 +56,60 @@ services:
   ##
   ###########################################################################
   ###########################################################################
-  # guacamole:
-  #   image: guacamole/guacamole
-  #   container_name: guacamole
-  #   restart: unless-stopped
-  #   user: ${PUID:?err}:${PGID:?err}
-  #   depends_on:
-  #     postgresql:
-  #       condition: service_healthy
-  #       restart: true
-  #   networks:
-  #     - mediastack
-  #   ports:
-  #     - ${WEBUI_PORT_GUACAMOLE:?err}:8080
-  #   environment:
-  #     - TZ=${TIMEZONE:?err}
-  #     - WEBAPP_CONTEXT=ROOT
-  #     - GUACD_HOSTNAME=guacd
-  #     - POSTGRESQL_HOSTNAME=postgresql
-  #     - POSTGRESQL_PORT=${POSTGRESQL_PORT:?err}
-  #     - POSTGRESQL_DATABASE=${GUACAMOLE_DATABASE:?err}
-  #     - POSTGRESQL_USER=${POSTGRESQL_USERNAME:?err}
-  #     - POSTGRESQL_PASSWORD=${POSTGRESQL_PASSWORD:?err}
-  #   labels:
-  #     - traefik.enable=true
-  #     # ROUTERS
-  #     - traefik.http.routers.guacamole.service=guacamole
-  #     - traefik.http.routers.guacamole.rule=Host(`guacamole.${CLOUDFLARE_DNS_ZONE:?err}`)
-  #     - traefik.http.routers.guacamole.entrypoints=secureweb
-  #     - traefik.http.routers.guacamole.middlewares=authentik-forwardauth@file,security-headers@file,traefik-bouncer@file
-  #     # SERVICES
-  #     - traefik.http.services.guacamole.loadbalancer.server.scheme=http
-  #     - traefik.http.services.guacamole.loadbalancer.server.port=8080
-  #     # MIDDLEWARES
+  guacamole:
+    image: guacamole/guacamole
+    container_name: guacamole
+    restart: unless-stopped
+    user: ${PUID:?err}:${PGID:?err}
+    depends_on:
+      postgresql:
+        condition: service_healthy
+        restart: true
+    networks:
+      - mediastack
+    ports:
+      - ${WEBUI_PORT_GUACAMOLE:?err}:8080
+    environment:
+      - TZ=${TIMEZONE:?err}
+      - WEBAPP_CONTEXT=ROOT
+      - GUACD_HOSTNAME=guacd
+      - POSTGRESQL_HOSTNAME=postgresql
+      - POSTGRESQL_PORT=${POSTGRESQL_PORT:?err}
+      - POSTGRESQL_DATABASE=${GUACAMOLE_DATABASE:?err}
+      - POSTGRESQL_USER=${POSTGRESQL_USERNAME:?err}
+      - POSTGRESQL_PASSWORD=${POSTGRESQL_PASSWORD:?err}
+    labels:
+      - traefik.enable=true
+      # ROUTERS
+      - traefik.http.routers.guacamole.service=guacamole
+      - traefik.http.routers.guacamole.rule=Host(`guacamole.${CLOUDFLARE_DNS_ZONE:?err}`)
+      - traefik.http.routers.guacamole.entrypoints=secureweb
+      - traefik.http.routers.guacamole.middlewares=authentik-forwardauth@file,security-headers@file,traefik-bouncer@file
+      # SERVICES
+      - traefik.http.services.guacamole.loadbalancer.server.scheme=http
+      - traefik.http.services.guacamole.loadbalancer.server.port=8080
+      # MIDDLEWARES
 
-  # guacd:
-  #   image: guacamole/guacd
-  #   container_name: guacd
-  #   restart: unless-stopped
-  #   user: ${PUID:?err}:${PGID:?err}
-  #   depends_on:
-  #     postgresql:
-  #       condition: service_healthy
-  #       restart: true
-  #   networks:
-  #     - mediastack
-  #   ports:
-  #     - ${GUACD_PORT:?err}:4822
-  #   environment:
-  #     - TZ=${TIMEZONE:?err}
-  #     - POSTGRESQL_HOSTNAME=postgresql
-  #     - POSTGRESQL_PORT=${POSTGRESQL_PORT:?err}
-  #     - POSTGRESQL_DATABASE=${GUACAMOLE_DATABASE:?err}
-  #     - POSTGRESQL_USER=${POSTGRESQL_USERNAME:?err}
-  #     - POSTGRESQL_PASSWORD=${POSTGRESQL_PASSWORD:?err}
+  guacd:
+    image: guacamole/guacd
+    container_name: guacd
+    restart: unless-stopped
+    user: ${PUID:?err}:${PGID:?err}
+    depends_on:
+      postgresql:
+        condition: service_healthy
+        restart: true
+    networks:
+      - mediastack
+    ports:
+      - ${GUACD_PORT:?err}:4822
+    environment:
+      - TZ=${TIMEZONE:?err}
+      - POSTGRESQL_HOSTNAME=postgresql
+      - POSTGRESQL_PORT=${POSTGRESQL_PORT:?err}
+      - POSTGRESQL_DATABASE=${GUACAMOLE_DATABASE:?err}
+      - POSTGRESQL_USER=${POSTGRESQL_USERNAME:?err}
+      - POSTGRESQL_PASSWORD=${POSTGRESQL_PASSWORD:?err}
 
   ###########################################################################
   ###########################################################################
@@ -322,7 +322,7 @@ services:
       - TZ=${TIMEZONE:?err}
     ports:
       - 127.0.0.1:${CROWDSEC_PORT:?err}:8080
-      # - 6060:6060 # Provides Metrics for Prometheus
+      - 6060:6060 # Provides Metrics for Prometheus
       - 7422:7422 # Provides WAF AppSec
     depends_on:
       - traefik
@@ -341,32 +341,32 @@ services:
   ##
   ###########################################################################
   ###########################################################################
-  # prometheus:
-  #   image: prom/prometheus
-  #   container_name: prometheus
-  #   restart: unless-stopped
-  #   user: ${PUID:?err}:${PGID:?err}
-  #   networks:
-  #     - mediastack
-  #   depends_on:
-  #     - crowdsec
-  #   ports:
-  #     - 127.0.0.1:${WEBUI_PORT_PROMETHEUS:?err}:9090
-  #   volumes:
-  #     - ${FOLDER_FOR_DATA:?err}/prometheus:/prometheus
-  #   environment:
-  #     - TZ=${TIMEZONE:?err}
-  #   labels:
-  #     - traefik.enable=true
-  #     # ROUTERS
-  #     - traefik.http.routers.prometheus.service=prometheus
-  #     - traefik.http.routers.prometheus.rule=Host(`prometheus.${CLOUDFLARE_DNS_ZONE:?err}`)
-  #     - traefik.http.routers.prometheus.entrypoints=secureweb
-  #     - traefik.http.routers.prometheus.middlewares=authentik-forwardauth@file,security-headers@file,traefik-bouncer@file
-  #     # SERVICES
-  #     - traefik.http.services.prometheus.loadbalancer.server.scheme=http
-  #     - traefik.http.services.prometheus.loadbalancer.server.port=9090
-  #     # MIDDLEWARES
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    restart: unless-stopped
+    user: ${PUID:?err}:${PGID:?err}
+    networks:
+      - mediastack
+    depends_on:
+      - crowdsec
+    ports:
+      - 127.0.0.1:${WEBUI_PORT_PROMETHEUS:?err}:9090
+    volumes:
+      - ${FOLDER_FOR_DATA:?err}/prometheus:/prometheus
+    environment:
+      - TZ=${TIMEZONE:?err}
+    labels:
+      - traefik.enable=true
+      # ROUTERS
+      - traefik.http.routers.prometheus.service=prometheus
+      - traefik.http.routers.prometheus.rule=Host(`prometheus.${CLOUDFLARE_DNS_ZONE:?err}`)
+      - traefik.http.routers.prometheus.entrypoints=secureweb
+      - traefik.http.routers.prometheus.middlewares=authentik-forwardauth@file,security-headers@file,traefik-bouncer@file
+      # SERVICES
+      - traefik.http.services.prometheus.loadbalancer.server.scheme=http
+      - traefik.http.services.prometheus.loadbalancer.server.port=9090
+      # MIDDLEWARES
 
   ###########################################################################
   ###########################################################################
@@ -378,33 +378,33 @@ services:
   ##
   ###########################################################################
   ###########################################################################
-  # grafana:
-  #   image: grafana/grafana-enterprise
-  #   container_name: grafana
-  #   restart: unless-stopped
-  #   user: ${PUID:?err}:${PGID:?err}
-  #   depends_on:
-  #     - crowdsec
-  #   networks:
-  #     - mediastack
-  #   ports:
-  #     - ${WEBUI_PORT_GRAFANA:?err}:3000
-  #   volumes:
-  #     - /var/log:/var/dockerhost:ro
-  #     - ${FOLDER_FOR_DATA:?err}/grafana:/var/lib/grafana
-  #   environment:
-  #     - TZ=${TIMEZONE:?err}
-  #   labels:
-  #     - traefik.enable=true
-  #     # ROUTERS
-  #     - traefik.http.routers.grafana.service=grafana
-  #     - traefik.http.routers.grafana.rule=Host(`grafana.${CLOUDFLARE_DNS_ZONE:?err}`)
-  #     - traefik.http.routers.grafana.entrypoints=secureweb
-  #     - traefik.http.routers.grafana.middlewares=authentik-forwardauth@file,security-headers@file,traefik-bouncer@file
-  #     # SERVICES
-  #     - traefik.http.services.grafana.loadbalancer.server.scheme=http
-  #     - traefik.http.services.grafana.loadbalancer.server.port=3000
-  #     # MIDDLEWARES
+  grafana:
+    image: grafana/grafana-enterprise
+    container_name: grafana
+    restart: unless-stopped
+    user: ${PUID:?err}:${PGID:?err}
+    depends_on:
+      - crowdsec
+    networks:
+      - mediastack
+    ports:
+      - ${WEBUI_PORT_GRAFANA:?err}:3000
+    volumes:
+      - /var/log:/var/dockerhost:ro
+      - ${FOLDER_FOR_DATA:?err}/grafana:/var/lib/grafana
+    environment:
+      - TZ=${TIMEZONE:?err}
+    labels:
+      - traefik.enable=true
+      # ROUTERS
+      - traefik.http.routers.grafana.service=grafana
+      - traefik.http.routers.grafana.rule=Host(`grafana.${CLOUDFLARE_DNS_ZONE:?err}`)
+      - traefik.http.routers.grafana.entrypoints=secureweb
+      - traefik.http.routers.grafana.middlewares=authentik-forwardauth@file,security-headers@file,traefik-bouncer@file
+      # SERVICES
+      - traefik.http.services.grafana.loadbalancer.server.scheme=http
+      - traefik.http.services.grafana.loadbalancer.server.port=3000
+      # MIDDLEWARES
 
   ###########################################################################
   ###########################################################################
@@ -416,33 +416,33 @@ services:
   ##
   ###########################################################################
   ###########################################################################
-  # headscale:
-  #   image: headscale/headscale:latest
-  #   container_name: headscale
-  #   restart: unless-stopped
-  #   networks:
-  #     - mediastack
-  #   command: serve
-  #   ports:
-  #     - ${CONNECT_PORT_HEADSCALE:?err}:8080
-  #     - ${METRICS_PORT_HEADSCALE:?err}:9090
-  #   volumes:
-  #     - ${FOLDER_FOR_DATA:?err}/headscale:/etc/headscale
-  #     - ${FOLDER_FOR_DATA:?err}/headscale/data:/var/lib/headscale
-  #   environment:
-  #     - TZ=${TIMEZONE:?err}
-  #   labels:
-  #     - traefik.enable=true
-  #   # ROUTERS
-  #     - traefik.http.routers.headscale.service=headscale
-  #     - traefik.http.routers.headscale.rule=Host(`headscale.${CLOUDFLARE_DNS_ZONE:?err}`)
-  #     - traefik.http.routers.headscale.entrypoints=secureweb
-  #     - traefik.http.routers.headscale.middlewares=security-headers@file,traefik-bouncer@file
-  #     # Do not add authentik-forwardauth@file to middlewares, otherwise Tailscale clients can't authenticate and connect
-  #   # SERVICES
-  #     - traefik.http.services.headscale.loadbalancer.server.scheme=http
-  #     - traefik.http.services.headscale.loadbalancer.server.port=8080
-  #   # MIDDLEWARES
+  headscale:
+    image: headscale/headscale:latest
+    container_name: headscale
+    restart: unless-stopped
+    networks:
+      - mediastack
+    command: serve
+    ports:
+      - ${CONNECT_PORT_HEADSCALE:?err}:8080
+      - ${METRICS_PORT_HEADSCALE:?err}:9090
+    volumes:
+      - ${FOLDER_FOR_DATA:?err}/headscale:/etc/headscale
+      - ${FOLDER_FOR_DATA:?err}/headscale/data:/var/lib/headscale
+    environment:
+      - TZ=${TIMEZONE:?err}
+    labels:
+      - traefik.enable=true
+      # ROUTERS
+      - traefik.http.routers.headscale.service=headscale
+      - traefik.http.routers.headscale.rule=Host(`headscale.${CLOUDFLARE_DNS_ZONE:?err}`)
+      - traefik.http.routers.headscale.entrypoints=secureweb
+      - traefik.http.routers.headscale.middlewares=security-headers@file,traefik-bouncer@file
+      # Do not add authentik-forwardauth@file to middlewares, otherwise Tailscale clients can't authenticate and connect
+      # SERVICES
+      - traefik.http.services.headscale.loadbalancer.server.scheme=http
+      - traefik.http.services.headscale.loadbalancer.server.port=8080
+      # MIDDLEWARES
 
   ###########################################################################
   ###########################################################################
@@ -454,24 +454,24 @@ services:
   ##
   ###########################################################################
   ###########################################################################
-  # tailscale:
-  #   image: tailscale/tailscale:latest
-  #   hostname: tailscale
-  #   container_name: tailscale
-  #   restart: unless-stopped
-  #   networks:
-  #     - mediastack
-  #   cap_add:
-  #     - net_admin
-  #   devices:
-  #     - /dev/net/tun:/dev/net/tun
-  #   volumes:
-  #     - ${FOLDER_FOR_DATA:?err}/tailscale:/var/lib/tailscale
-  #   environment:
-  #     - TS_USERSPACE=false
-  #     - TS_STATE_DIR=/var/lib/tailscale
-  #     - TS_AUTHKEY=${TAILSCALE_AUTHKEY:?err}
-  #     - TS_EXTRA_ARGS=--hostname=exit-node --advertise-exit-node --advertise-routes=${LOCAL_SUBNET:?err},${DOCKER_SUBNET:?err} --login-server=https://headscale.${CLOUDFLARE_DNS_ZONE:?err}
+  tailscale:
+    image: tailscale/tailscale:latest
+    hostname: tailscale
+    container_name: tailscale
+    restart: unless-stopped
+    networks:
+      - mediastack
+    cap_add:
+      - net_admin
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    volumes:
+      - ${FOLDER_FOR_DATA:?err}/tailscale:/var/lib/tailscale
+    environment:
+      - TS_USERSPACE=false
+      - TS_STATE_DIR=/var/lib/tailscale
+      - TS_AUTHKEY=${TAILSCALE_AUTHKEY:?err}
+      - TS_EXTRA_ARGS=--hostname=exit-node --advertise-exit-node --advertise-routes=${LOCAL_SUBNET:?err},${DOCKER_SUBNET:?err} --login-server=https://headscale.${CLOUDFLARE_DNS_ZONE:?err}
 
   ###########################################################################
   ###########################################################################
@@ -483,32 +483,32 @@ services:
   ##
   ###########################################################################
   ###########################################################################
-  # headplane:
-  #   image: ghcr.io/tale/headplane:latest
-  #   container_name: headplane
-  #   restart: unless-stopped
-  #   networks:
-  #     - mediastack
-  #   ports:
-  #     - ${WEBUI_PORT_HEADPLANE:?err}:3000
-  #   volumes:
-  #     - /var/run/docker.sock:/var/run/docker.sock:ro
-  #     - ${FOLDER_FOR_DATA:?err}/headscale:/etc/headscale
-  #     - ${FOLDER_FOR_DATA:?err}/headplane:/etc/headplane
-  #     - ${FOLDER_FOR_DATA:?err}/headplane/data:/var/lib/headplane
-  #   environment:
-  #     - TZ=${TIMEZONE:?err}
-  #   labels:
-  #     - traefik.enable=true
-  #   # ROUTERS
-  #     - traefik.http.routers.headplane.service=headplane
-  #     - traefik.http.routers.headplane.rule=Host(`headplane.${CLOUDFLARE_DNS_ZONE:?err}`) && PathPrefix(`/admin/`)
-  #     - traefik.http.routers.headplane.entrypoints=secureweb
-  #     - traefik.http.routers.headplane.middlewares=authentik-forwardauth@file,security-headers@file,traefik-bouncer@file
-  #   # SERVICES
-  #     - traefik.http.services.headplane.loadbalancer.server.scheme=http
-  #     - traefik.http.services.headplane.loadbalancer.server.port=3000
-  #   # MIDDLEWARES
+  headplane:
+    image: ghcr.io/tale/headplane:latest
+    container_name: headplane
+    restart: unless-stopped
+    networks:
+      - mediastack
+    ports:
+      - ${WEBUI_PORT_HEADPLANE:?err}:3000
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ${FOLDER_FOR_DATA:?err}/headscale:/etc/headscale
+      - ${FOLDER_FOR_DATA:?err}/headplane:/etc/headplane
+      - ${FOLDER_FOR_DATA:?err}/headplane/data:/var/lib/headplane
+    environment:
+      - TZ=${TIMEZONE:?err}
+    labels:
+      - traefik.enable=true
+      # ROUTERS
+      - traefik.http.routers.headplane.service=headplane
+      - traefik.http.routers.headplane.rule=Host(`headplane.${CLOUDFLARE_DNS_ZONE:?err}`) && PathPrefix(`/admin/`)
+      - traefik.http.routers.headplane.entrypoints=secureweb
+      - traefik.http.routers.headplane.middlewares=authentik-forwardauth@file,security-headers@file,traefik-bouncer@file
+      # SERVICES
+      - traefik.http.services.headplane.loadbalancer.server.scheme=http
+      - traefik.http.services.headplane.loadbalancer.server.port=3000
+      # MIDDLEWARES
 
   ###########################################################################
   ###########################################################################
@@ -537,9 +537,9 @@ services:
       # Comment out lines below if they are not going to use Gluetun VPN for Internet connection:
 
       - ${WEBUI_PORT_BAZARR:?err}:6767 # WebUI Portal: Bazarr
-      # - ${WEBUI_PORT_FILEBOT:?err}:5454 # WebUI Portal: Filebot
+      - ${WEBUI_PORT_FILEBOT:?err}:5454 # WebUI Portal: Filebot
       - ${WEBUI_PORT_HUNTARR:?err}:9705 # WebUI Portal: Huntarr
-      # - ${WEBUI_PORT_JELLYFIN:?err}:8096      # WebUI Portal: Jellyfin
+      - ${WEBUI_PORT_JELLYFIN:?err}:8096      # WebUI Portal: Jellyfin
       - ${WEBUI_PORT_JELLYSEERR:?err}:5055 # WebUI Portal: Jellyseerr
       - ${WEBUI_PORT_LIDARR:?err}:8686 # WebUI Portal: Lidarr
       - ${WEBUI_PORT_MYLAR:?err}:8090 # WebUI Portal: Mylar3
@@ -553,7 +553,7 @@ services:
       - ${WEBUI_PORT_QBITTORRENT:?err}:${WEBUI_PORT_QBITTORRENT:?err} # WebUI Portal: qBittorrent
 
       - ${QBIT_PORT:?err}:6881 # Transmission Torrent Port
-      # - ${FLARESOLVERR_PORT:?err}:8191 # Service Port: FlareSolverr
+      - ${FLARESOLVERR_PORT:?err}:8191 # Service Port: FlareSolverr
 
       # - ${TDARR_SERVER_PORT:?err}:${TDARR_SERVER_PORT:?err}   # Tdarr: Server Port
       # - ${WEBUI_PORT_TDARR:?err}:${WEBUI_PORT_TDARR:?err}     # Tdarr: WebUI Portal
@@ -650,35 +650,35 @@ services:
   ##
   ###########################################################################
   ###########################################################################
-  # chromium:
-  #   image: lscr.io/linuxserver/chromium:latest
-  #   container_name: chromium
-  #   restart: unless-stopped
-  #   shm_size: 1gb
-  #   volumes:
-  #     - ${FOLDER_FOR_DATA:?err}/chromium:/config
-  #   environment:
-  #     - PUID=${PUID:?err}
-  #     - PGID=${PGID:?err}
-  #     - TZ=${TIMEZONE:?err}
-  #     - TITLE=MediaStack Chromium
-  #     - CUSTOM_PORT=${WEBUI_PORT_CHROMIUM:?err}
-  #     - CHROME_CLI=${CHROMIUM_START_PAGE:?err}
-  #   ports:
-  #     - ${WEBUI_PORT_CHROMIUM:?err}:${WEBUI_PORT_CHROMIUM:?err}
-  #   networks:
-  #     - mediastack
-  #   labels:
-  #     - traefik.enable=true
-  #   # ROUTERS
-  #     - traefik.http.routers.chromium.service=chromium
-  #     - traefik.http.routers.chromium.rule=Host(`chromium.${CLOUDFLARE_DNS_ZONE:?err}`)
-  #     - traefik.http.routers.chromium.entrypoints=secureweb
-  #     - traefik.http.routers.chromium.middlewares=authentik-forwardauth@file,security-headers@file,traefik-bouncer@file
-  #   # SERVICES
-  #     - traefik.http.services.chromium.loadbalancer.server.scheme=http
-  #     - traefik.http.services.chromium.loadbalancer.server.port=${WEBUI_PORT_CHROMIUM:?err}
-  #   # MIDDLEWARES
+  chromium:
+    image: lscr.io/linuxserver/chromium:latest
+    container_name: chromium
+    restart: unless-stopped
+    shm_size: 1gb
+    volumes:
+      - ${FOLDER_FOR_DATA:?err}/chromium:/config
+    environment:
+      - PUID=${PUID:?err}
+      - PGID=${PGID:?err}
+      - TZ=${TIMEZONE:?err}
+      - TITLE=MediaStack Chromium
+      - CUSTOM_PORT=${WEBUI_PORT_CHROMIUM:?err}
+      - CHROME_CLI=${CHROMIUM_START_PAGE:?err}
+    ports:
+      - ${WEBUI_PORT_CHROMIUM:?err}:${WEBUI_PORT_CHROMIUM:?err}
+    networks:
+      - mediastack
+    labels:
+      - traefik.enable=true
+      # ROUTERS
+      - traefik.http.routers.chromium.service=chromium
+      - traefik.http.routers.chromium.rule=Host(`chromium.${CLOUDFLARE_DNS_ZONE:?err}`)
+      - traefik.http.routers.chromium.entrypoints=secureweb
+      - traefik.http.routers.chromium.middlewares=authentik-forwardauth@file,security-headers@file,traefik-bouncer@file
+      # SERVICES
+      - traefik.http.services.chromium.loadbalancer.server.scheme=http
+      - traefik.http.services.chromium.loadbalancer.server.port=${WEBUI_PORT_CHROMIUM:?err}
+      # MIDDLEWARES
 
   ###########################################################################
   ###########################################################################
@@ -702,7 +702,7 @@ services:
     environment:
       - UMASK=${UMASK:?err}
       - TZ=${TIMEZONE:?err}
-      # - CONFIG=
+      - CONFIG=
       - PERIOD=5m
       - UPDATE_COOLDOWN_PERIOD=5m
       - PUBLICIP_FETCHERS=all
@@ -749,38 +749,38 @@ services:
   ##
   ###########################################################################
   ###########################################################################
-  # filebot:
-  #   image: rednoah/filebot:xpra
-  #   container_name: filebot
-  #   restart: unless-stopped
-  #   depends_on:
-  #     gluetun:
-  #       condition: service_healthy
-  #       restart: true
-  #   volumes:
-  #     - ${FOLDER_FOR_MEDIA:?err}/filebot:/filebot
-  #     - ${FOLDER_FOR_DATA:?err}/filebot:/data/filebot
-  #   environment:
-  #     # - XPRA_AUTH=password:value=YOUR_PASSWORD
-  #     - PUID=${PUID:?err}
-  #     - PGID=${PGID:?err}
-  #     - UMASK=${UMASK:?err}
-  #     - TZ=${TIMEZONE:?err}
-  #     - DARK_MODE=1
-  #   network_mode: "service:gluetun"
-  #   # ports:
-  #   #   - ${WEBUI_PORT_FILEBOT:?err}:5454             # Configured in Gluetun VPN service
-  #   labels:
-  #     - traefik.enable=true
-  #     # ROUTERS
-  #     - traefik.http.routers.filebot.service=filebot
-  #     - traefik.http.routers.filebot.rule=Host(`filebot.${CLOUDFLARE_DNS_ZONE:?err}`)
-  #     - traefik.http.routers.filebot.entrypoints=secureweb
-  #     - traefik.http.routers.filebot.middlewares=authentik-forwardauth@file,security-headers@file,traefik-bouncer@file
-  #     # SERVICES
-  #     - traefik.http.services.filebot.loadbalancer.server.scheme=http
-  #     - traefik.http.services.filebot.loadbalancer.server.port=5454
-  #     # MIDDLEWARES
+  filebot:
+    image: rednoah/filebot:xpra
+    container_name: filebot
+    restart: unless-stopped
+    depends_on:
+      gluetun:
+        condition: service_healthy
+        restart: true
+    volumes:
+      - ${FOLDER_FOR_MEDIA:?err}/filebot:/filebot
+      - ${FOLDER_FOR_DATA:?err}/filebot:/data/filebot
+    environment:
+      # - XPRA_AUTH=password:value=YOUR_PASSWORD
+      - PUID=${PUID:?err}
+      - PGID=${PGID:?err}
+      - UMASK=${UMASK:?err}
+      - TZ=${TIMEZONE:?err}
+      - DARK_MODE=1
+    network_mode: "service:gluetun"
+    # ports:
+    #   - ${WEBUI_PORT_FILEBOT:?err}:5454             # Configured in Gluetun VPN service
+    labels:
+      - traefik.enable=true
+      # ROUTERS
+      - traefik.http.routers.filebot.service=filebot
+      - traefik.http.routers.filebot.rule=Host(`filebot.${CLOUDFLARE_DNS_ZONE:?err}`)
+      - traefik.http.routers.filebot.entrypoints=secureweb
+      - traefik.http.routers.filebot.middlewares=authentik-forwardauth@file,security-headers@file,traefik-bouncer@file
+      # SERVICES
+      - traefik.http.services.filebot.loadbalancer.server.scheme=http
+      - traefik.http.services.filebot.loadbalancer.server.port=5454
+      # MIDDLEWARES
 
   ###########################################################################
   ###########################################################################
@@ -792,33 +792,33 @@ services:
   ##
   ###########################################################################
   ###########################################################################
-  # flaresolverr:
-  #   image: ghcr.io/flaresolverr/flaresolverr:latest
-  #   container_name: flaresolverr
-  #   restart: unless-stopped
-  #   depends_on:
-  #     gluetun:
-  #       condition: service_healthy
-  #       restart: true
-  #   environment:
-  #     - LOG_LEVEL=info
-  #     - LOG_HTML=false
-  #     - CAPTCHA_SOLVER=none
-  #     - TZ=${TIMEZONE:?err}
-  #   network_mode: "service:gluetun"
-  #   # ports:
-  #   #   - ${FLARESOLVERR_PORT:?err}:8191             # Configured in Gluetun VPN container
-  #   labels:
-  #     - traefik.enable=true
-  #     # ROUTERS
-  #     - traefik.http.routers.flaresolverr.service=flaresolverr
-  #     - traefik.http.routers.flaresolverr.rule=Host(`flaresolverr.${CLOUDFLARE_DNS_ZONE:?err}`)
-  #     - traefik.http.routers.flaresolverr.entrypoints=secureweb
-  #     - traefik.http.routers.flaresolverr.middlewares=authentik-forwardauth@file,security-headers@file,traefik-bouncer@file
-  #     # SERVICES
-  #     - traefik.http.services.flaresolverr.loadbalancer.server.scheme=http
-  #     - traefik.http.services.flaresolverr.loadbalancer.server.port=8191
-  #     # MIDDLEWARES
+  flaresolverr:
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    container_name: flaresolverr
+    restart: unless-stopped
+    depends_on:
+      gluetun:
+        condition: service_healthy
+        restart: true
+    environment:
+      - LOG_LEVEL=info
+      - LOG_HTML=false
+      - CAPTCHA_SOLVER=none
+      - TZ=${TIMEZONE:?err}
+    network_mode: "service:gluetun"
+    # ports:
+    #   - ${FLARESOLVERR_PORT:?err}:8191             # Configured in Gluetun VPN container
+    labels:
+      - traefik.enable=true
+      # ROUTERS
+      - traefik.http.routers.flaresolverr.service=flaresolverr
+      - traefik.http.routers.flaresolverr.rule=Host(`flaresolverr.${CLOUDFLARE_DNS_ZONE:?err}`)
+      - traefik.http.routers.flaresolverr.entrypoints=secureweb
+      - traefik.http.routers.flaresolverr.middlewares=authentik-forwardauth@file,security-headers@file,traefik-bouncer@file
+      # SERVICES
+      - traefik.http.services.flaresolverr.loadbalancer.server.scheme=http
+      - traefik.http.services.flaresolverr.loadbalancer.server.port=8191
+      # MIDDLEWARES
 
   ###########################################################################
   ###########################################################################
@@ -986,43 +986,43 @@ services:
   ##
   ###########################################################################
   ###########################################################################
-  #   jellyfin:
-  #     image: lscr.io/linuxserver/jellyfin:latest
-  #     container_name: jellyfin
-  #     restart: unless-stopped
-  #     depends_on:
-  #       gluetun:
-  #         condition: service_healthy
-  #         restart: true
-  # # Add Configurations for GPU Hardware Rendering Here:
-  # #    devices:
-  # #      - /dev/dri/renderD128:/dev/dri/renderD128
-  # #      - /dev/dri/card0:/dev/dri/card0
-  #     volumes:
-  #       - ${FOLDER_FOR_MEDIA:?err}/media:/data/media
-  #       - ${FOLDER_FOR_DATA:?err}/jellyfin:/config
-  #     environment:
-  #       - PUID=${PUID:?err}
-  #       - PGID=${PGID:?err}
-  #       - UMASK=${UMASK:?err}
-  #       - TZ=${TIMEZONE:?err}
-  # #      - JELLYFIN_PublishedServerUrl=${LOCAL_DOCKER_IP:?err}  # Enable for DLNA - Only works on HOST Network Mode
-  #     network_mode: "service:gluetun"
-  # #    ports:
-  # #      - ${WEBUI_PORT_JELLYFIN:?err}:8096             # Configured in Gluetun VPN container
-  # #      - 7359:7359/udp                 # Enable for DLNA - Only works on HOST Network Mode
-  # #      - 1900:1900/udp                 # Enable for DLNA - Only works on HOST Network Mode
-  #     labels:
-  #       - traefik.enable=true
-  #     # ROUTERS
-  #       - traefik.http.routers.jellyfin.service=jellyfin
-  #       - traefik.http.routers.jellyfin.rule=Host(`jellyfin.${CLOUDFLARE_DNS_ZONE:?err}`)
-  #       - traefik.http.routers.jellyfin.entrypoints=secureweb
-  #       - traefik.http.routers.jellyfin.middlewares=authentik-forwardauth@file,security-headers@file,traefik-bouncer@file
-  #     # SERVICES
-  #       - traefik.http.services.jellyfin.loadbalancer.server.scheme=http
-  #       - traefik.http.services.jellyfin.loadbalancer.server.port=8096
-  #     # MIDDLEWARES
+  jellyfin:
+    image: lscr.io/linuxserver/jellyfin:latest
+    container_name: jellyfin
+    restart: unless-stopped
+    depends_on:
+      gluetun:
+        condition: service_healthy
+        restart: true
+    # Add Configurations for GPU Hardware Rendering Here:
+    # devices:
+    #   - /dev/dri/renderD128:/dev/dri/renderD128
+    #   - /dev/dri/card0:/dev/dri/card0
+    volumes:
+      - ${FOLDER_FOR_MEDIA:?err}/media:/data/media
+      - ${FOLDER_FOR_DATA:?err}/jellyfin:/config
+    environment:
+      - PUID=${PUID:?err}
+      - PGID=${PGID:?err}
+      - UMASK=${UMASK:?err}
+      - TZ=${TIMEZONE:?err}
+      # - JELLYFIN_PublishedServerUrl=${LOCAL_DOCKER_IP:?err}  # Enable for DLNA - Only works on HOST Network Mode
+    network_mode: "service:gluetun"
+    # ports:
+    #   - ${WEBUI_PORT_JELLYFIN:?err}:8096             # Configured in Gluetun VPN container
+    #   - 7359:7359/udp                 # Enable for DLNA - Only works on HOST Network Mode
+    #   - 1900:1900/udp                 # Enable for DLNA - Only works on HOST Network Mode
+    labels:
+      - traefik.enable=true
+      # ROUTERS
+      - traefik.http.routers.jellyfin.service=jellyfin
+      - traefik.http.routers.jellyfin.rule=Host(`jellyfin.${CLOUDFLARE_DNS_ZONE:?err}`)
+      - traefik.http.routers.jellyfin.entrypoints=secureweb
+      - traefik.http.routers.jellyfin.middlewares=authentik-forwardauth@file,security-headers@file,traefik-bouncer@file
+      # SERVICES
+      - traefik.http.services.jellyfin.loadbalancer.server.scheme=http
+      - traefik.http.services.jellyfin.loadbalancer.server.port=8096
+      # MIDDLEWARES
 
   ###########################################################################
   ###########################################################################
@@ -1419,36 +1419,36 @@ services:
   ##
   ###########################################################################
   ###########################################################################
-  #   sabnzbd:
-  #     image: lscr.io/linuxserver/sabnzbd:latest
-  #     container_name: sabnzbd
-  #     restart: unless-stopped
-  #     depends_on:
-  #       gluetun:
-  #         condition: service_healthy
-  #         restart: true
-  #     volumes:
-  #       - ${FOLDER_FOR_MEDIA:?err}:/data
-  #       - ${FOLDER_FOR_DATA:?err}/sabnzbd:/config
-  #     environment:
-  #       - PUID=${PUID:?err}
-  #       - PGID=${PGID:?err}
-  #       - TZ=${TIMEZONE:?err}
-  #       - DOCKER_MODS=ghcr.io/themepark-dev/theme.park:sabnzbd
-  #       - TP_THEME=${TP_THEME:?err}
-  #     network_mode: "service:gluetun"
-  # #    ports:
-  # #      - ${WEBUI_PORT_SABNZBD:?err}:8080             # Configured in Gluetun VPN container
-  #     labels:
-  #       - traefik.enable=true
+  # sabnzbd:
+  #   image: lscr.io/linuxserver/sabnzbd:latest
+  #   container_name: sabnzbd
+  #   restart: unless-stopped
+  #   depends_on:
+  #     gluetun:
+  #       condition: service_healthy
+  #       restart: true
+  #   volumes:
+  #     - ${FOLDER_FOR_MEDIA:?err}:/data
+  #     - ${FOLDER_FOR_DATA:?err}/sabnzbd:/config
+  #   environment:
+  #     - PUID=${PUID:?err}
+  #     - PGID=${PGID:?err}
+  #     - TZ=${TIMEZONE:?err}
+  #     - DOCKER_MODS=ghcr.io/themepark-dev/theme.park:sabnzbd
+  #     - TP_THEME=${TP_THEME:?err}
+  #   network_mode: "service:gluetun"
+  #   # ports:
+  #   #   - ${WEBUI_PORT_SABNZBD:?err}:8080             # Configured in Gluetun VPN container
+  #   labels:
+  #     - traefik.enable=true
   #     # ROUTERS
-  #       - traefik.http.routers.sabnzbd.service=sabnzbd
-  #       - traefik.http.routers.sabnzbd.rule=Host(`sabnzbd.${CLOUDFLARE_DNS_ZONE:?err}`)
-  #       - traefik.http.routers.sabnzbd.entrypoints=secureweb
-  #       - traefik.http.routers.sabnzbd.middlewares=authentik-forwardauth@file,security-headers@file,traefik-bouncer@file
+  #     - traefik.http.routers.sabnzbd.service=sabnzbd
+  #     - traefik.http.routers.sabnzbd.rule=Host(`sabnzbd.${CLOUDFLARE_DNS_ZONE:?err}`)
+  #     - traefik.http.routers.sabnzbd.entrypoints=secureweb
+  #     - traefik.http.routers.sabnzbd.middlewares=authentik-forwardauth@file,security-headers@file,traefik-bouncer@file
   #     # SERVICES
-  #       - traefik.http.services.sabnzbd.loadbalancer.server.scheme=http
-  #       - traefik.http.services.sabnzbd.loadbalancer.server.port=8080
+  #     - traefik.http.services.sabnzbd.loadbalancer.server.scheme=http
+  #     - traefik.http.services.sabnzbd.loadbalancer.server.port=8080
   #     # MIDDLEWARES
 
   ###########################################################################
@@ -1505,68 +1505,68 @@ services:
   ##
   ###########################################################################
   ###########################################################################
-  #   tdarr:
-  #     image: ghcr.io/haveagitgat/tdarr:latest
-  #     container_name: tdarr
-  #     restart: unless-stopped
-  #     depends_on:
-  #       gluetun:
-  #         condition: service_healthy
-  #         restart: true
-  #     volumes:
-  #       - ${FOLDER_FOR_MEDIA:?err}/media:/data
-  #       - ${FOLDER_FOR_DATA:?err}/tdarr/server:/app/server
-  #       - ${FOLDER_FOR_DATA:?err}/tdarr/configs:/app/configs
-  #       - ${FOLDER_FOR_DATA:?err}/tdarr/logs:/app/logs
-  #       - ${FOLDER_FOR_DATA:?err}/tdarr-node:/temp
-  #     environment:
-  #       - PUID=${PUID:?err}
-  #       - PGID=${PGID:?err}
-  #       - UMASK=${UMASK:?err}
-  #       - TZ=${TIMEZONE:?err}
-  #       - serverIP=0.0.0.0
-  #       - serverPort=${TDARR_SERVER_PORT:?err}
-  #       - webUIPort=${WEBUI_PORT_TDARR:?err}
-  #       - internalNode=true
-  #       - nodeID=Tdarr_Server
-  #     network_mode: "service:gluetun"
-  # #    ports:
-  # #      - ${TDARR_SERVER_PORT:?err}:${TDARR_SERVER_PORT:?err}      # Configured in Gluetun VPN container
-  # #      - ${WEBUI_PORT_TDARR:?err}:${WEBUI_PORT_TDARR:?err}        # Configured in Gluetun VPN container
-  #     labels:
-  #       - traefik.enable=true
+  # tdarr:
+  #   image: ghcr.io/haveagitgat/tdarr:latest
+  #   container_name: tdarr
+  #   restart: unless-stopped
+  #   depends_on:
+  #     gluetun:
+  #       condition: service_healthy
+  #       restart: true
+  #   volumes:
+  #     - ${FOLDER_FOR_MEDIA:?err}/media:/data
+  #     - ${FOLDER_FOR_DATA:?err}/tdarr/server:/app/server
+  #     - ${FOLDER_FOR_DATA:?err}/tdarr/configs:/app/configs
+  #     - ${FOLDER_FOR_DATA:?err}/tdarr/logs:/app/logs
+  #     - ${FOLDER_FOR_DATA:?err}/tdarr-node:/temp
+  #   environment:
+  #     - PUID=${PUID:?err}
+  #     - PGID=${PGID:?err}
+  #     - UMASK=${UMASK:?err}
+  #     - TZ=${TIMEZONE:?err}
+  #     - serverIP=0.0.0.0
+  #     - serverPort=${TDARR_SERVER_PORT:?err}
+  #     - webUIPort=${WEBUI_PORT_TDARR:?err}
+  #     - internalNode=true
+  #     - nodeID=Tdarr_Server
+  #   network_mode: "service:gluetun"
+  #   # ports:
+  #   #   - ${TDARR_SERVER_PORT:?err}:${TDARR_SERVER_PORT:?err}      # Configured in Gluetun VPN container
+  #   #   - ${WEBUI_PORT_TDARR:?err}:${WEBUI_PORT_TDARR:?err}        # Configured in Gluetun VPN container
+  #   labels:
+  #     - traefik.enable=true
   #     # ROUTERS
-  #       - traefik.http.routers.tdarr.service=tdarr
-  #       - traefik.http.routers.tdarr.rule=Host(`tdarr.${CLOUDFLARE_DNS_ZONE:?err}`)
-  #       - traefik.http.routers.tdarr.entrypoints=secureweb
-  #       - traefik.http.routers.tdarr.middlewares=authentik-forwardauth@file,security-headers@file,traefik-bouncer@file
+  #     - traefik.http.routers.tdarr.service=tdarr
+  #     - traefik.http.routers.tdarr.rule=Host(`tdarr.${CLOUDFLARE_DNS_ZONE:?err}`)
+  #     - traefik.http.routers.tdarr.entrypoints=secureweb
+  #     - traefik.http.routers.tdarr.middlewares=authentik-forwardauth@file,security-headers@file,traefik-bouncer@file
   #     # SERVICES
-  #       - traefik.http.services.tdarr.loadbalancer.server.scheme=http
-  #       - traefik.http.services.tdarr.loadbalancer.server.port=${WEBUI_PORT_TDARR:?err}
+  #     - traefik.http.services.tdarr.loadbalancer.server.scheme=http
+  #     - traefik.http.services.tdarr.loadbalancer.server.port=${WEBUI_PORT_TDARR:?err}
   #     # MIDDLEWARES
 
-  #   tdarr-node:
-  #     image: ghcr.io/haveagitgat/tdarr_node:latest
-  #     container_name: tdarr-node
-  #     restart: unless-stopped
-  #     depends_on:
-  #       gluetun:
-  #         condition: service_healthy
-  #         restart: true
-  #     volumes:
-  #       - ${FOLDER_FOR_MEDIA:?err}/media:/data
-  #       - ${FOLDER_FOR_DATA:?err}/tdarr/configs:/app/configs
-  #       - ${FOLDER_FOR_DATA:?err}/tdarr/logs:/app/logs
-  #       - ${FOLDER_FOR_DATA:?err}/tdarr-node:/temp
-  #     environment:
-  #       - PUID=${PUID:?err}
-  #       - PGID=${PGID:?err}
-  #       - UMASK=${UMASK:?err}
-  #       - TZ=${TIMEZONE:?err}
-  #       - nodeID=Tdarr_Node_1
-  #       - serverIP=0.0.0.0
-  #       - serverPort=${TDARR_SERVER_PORT:?err}
-  #     network_mode: "service:gluetun"
+  # tdarr-node:
+  #   image: ghcr.io/haveagitgat/tdarr_node:latest
+  #   container_name: tdarr-node
+  #   restart: unless-stopped
+  #   depends_on:
+  #     gluetun:
+  #       condition: service_healthy
+  #       restart: true
+  #   volumes:
+  #     - ${FOLDER_FOR_MEDIA:?err}/media:/data
+  #     - ${FOLDER_FOR_DATA:?err}/tdarr/configs:/app/configs
+  #     - ${FOLDER_FOR_DATA:?err}/tdarr/logs:/app/logs
+  #     - ${FOLDER_FOR_DATA:?err}/tdarr-node:/temp
+  #   environment:
+  #     - PUID=${PUID:?err}
+  #     - PGID=${PGID:?err}
+  #     - UMASK=${UMASK:?err}
+  #     - TZ=${TIMEZONE:?err}
+  #     - nodeID=Tdarr_Node_1
+  #     - serverIP=0.0.0.0
+  #     - serverPort=${TDARR_SERVER_PORT:?err}
+  #   network_mode: "service:gluetun"
 
   ###########################################################################
   ###########################################################################
